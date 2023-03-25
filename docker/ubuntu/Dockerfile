@@ -7,7 +7,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:-compute,utility}
 RUN apt update && \
     apt install -y \
         wget build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev \
-        libreadline-dev libffi-dev libsqlite3-dev libbz2-dev liblzma-dev && \
+        libreadline-dev libffi-dev libsqlite3-dev libbz2-dev liblzma-dev openssh-server && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -56,6 +56,11 @@ RUN if [ ! $TORCHAUDIO_VERSION ]; \
         absl_py==1.3.0 h5py==3.7.0 matplotlib==3.6.2 ml_collections==0.1.1 numpy==1.23.5 pandas==1.5.2 \
         pytorch_lightning==1.8.3.post1 scikit_learn==1.1.3 scipy==1.9.3 sortedcontainers==2.4.0\
         torchdiffeq==0.2.3 tqdm==4.64.1 pyro-ppl; \
-    rm -r /root/.cache/pip
+    rm -r /root/.cache/pip;
+
+RUN sed -E 's/^#(PermitRootLogin )no/\1yes/' /etc/ssh/sshd_config -i;
+RUN sed -E 's/^#(PasswordAuthentication )yes/\1no/' /etc/ssh/sshd_config -i;
+RUN ssh-keygen -A
+CMD service sshd start && tail -F /var/log/sshd/error.log
 
 WORKDIR /workspace

@@ -50,6 +50,11 @@ RUN if [ ! $TORCHAUDIO_VERSION ]; \
             ${TORCHAUDIO} \
             -f ${PYTORCH_DOWNLOAD_URL}; \
     fi && \
-    rm -r /root/.cache/pip
+    rm -r /root/.cache/pip;
+
+RUN sed -E 's/^#(PermitRootLogin )no/\1yes/' /etc/ssh/sshd_config -i;
+RUN sed -E 's/^#(PasswordAuthentication )yes/\1no/' /etc/ssh/sshd_config -i;
+RUN ssh-keygen -A
+CMD service sshd start && tail -F /var/log/sshd/error.log
 
 WORKDIR /workspace
